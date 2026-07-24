@@ -95,16 +95,15 @@ data = read_data(in_filename)
 data = [[stringtonum(x) for x in row] for row in data]
 
 
-/*in_filename1 = "values2x.txt"
-in_filename2 = "hvalues2.txt"
-out_filename = "Ht_data_10_1000_verified_v4.txt"
-
-xvals = read_data(in_filename1)[0]
-xvals[0]=xvals[0][1:]; xvals[-1] = xvals[-1][:-1];
-hvals = read_data(in_filename2)[0]
-hvals[0]=hvals[0][1:]; hvals[-1] = hvals[-1][:-1];
-data = [[mpf(xvals[i]),mpc(hvals[2*i],hvals[2*i+1])] for i in range(len(xvals))] 
-*/
+# Alternate input pipeline (kept for reference):
+# in_filename1 = "values2x.txt"
+# in_filename2 = "hvalues2.txt"
+# out_filename = "Ht_data_10_1000_verified_v4.txt"
+# xvals = read_data(in_filename1)[0]
+# xvals[0]=xvals[0][1:]; xvals[-1] = xvals[-1][:-1];
+# hvals = read_data(in_filename2)[0]
+# hvals[0]=hvals[0][1:]; hvals[-1] = hvals[-1][:-1];
+# data = [[mpf(xvals[i]),mpc(hvals[2*i],hvals[2*i+1])] for i in range(len(xvals))]
 
 stepsize = 0.005
 xc_step = 2.0
