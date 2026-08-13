@@ -5,7 +5,7 @@ This module contains various math utilities for the main project
 from cmath import exp, log, cos, sqrt
 from scipy.integrate import quad
 from scipy.optimize import fsolve
-import scipy
+import numpy as np
 from dbn_upper_bound.python.constants import PI, PI_sq
 
 
@@ -67,8 +67,8 @@ def Ht_complex(z, t):
     :return:
     """
     #may work well only for small to medium values of z
-    def real_func(a, b, c): return scipy.real(Ht_complex_integrand(a, b, c))
-    def imag_func(a, b, c): return scipy.imag(Ht_complex_integrand(a, b, c))
+    def real_func(a, b, c): return np.real(Ht_complex_integrand(a, b, c))
+    def imag_func(a, b, c): return np.imag(Ht_complex_integrand(a, b, c))
     real_part = quad(real_func, 0, 10, args=(z, t))
     imag_part = quad(imag_func, 0, 10, args=(z, t))
     return (real_part[0] + 1j*imag_part[0], real_part[1], imag_part[1])
@@ -85,7 +85,7 @@ def Ht_complex_root_finding_helper(z_as_array, t):
     """
     z = float(z_as_array[0]) + 1j*float(z_as_array[1])
     Ht = Ht_complex(z, t)[0]
-    return (scipy.real(Ht), scipy.imag(Ht))
+    return (np.real(Ht), np.imag(Ht))
 
 
 def Ht_complex_root_finder(complex_guess, t):
@@ -96,7 +96,7 @@ def Ht_complex_root_finder(complex_guess, t):
     :return:
     """
     result = fsolve(Ht_complex_root_finding_helper,
-                    [scipy.real(complex_guess), scipy.imag(complex_guess)],
+                    [np.real(complex_guess), np.imag(complex_guess)],
                     args=(t,))
     return result[0]+1j*result[1]
 
@@ -110,8 +110,8 @@ def Ht_complex_zlarge(z, t):
     :param t:
     :return:
     """
-    x = float(scipy.real(z))
-    y = float(scipy.imag(z))
+    x = float(np.real(z))
+    y = float(np.imag(z))
     t = float(t)
     x_by_4PI = x/(4*PI)
     B = ((PI*t/16)+(x/4))*log(x_by_4PI) - (x/4) + PI*(9+y)/8
@@ -132,13 +132,13 @@ def Ht_real_integrand(u, z, t):
     :param t:
     :return:
     """
-    if abs(scipy.imag(z)) > 0 or abs(scipy.imag(t)) > 0 \
-            or abs(scipy.imag(u)) > 0:
+    if abs(np.imag(z)) > 0 or abs(np.imag(t)) > 0 \
+            or abs(np.imag(u)) > 0:
         print("complex values not allowed for this function")
         return "error"
 
-    u, z, t = scipy.real(u), scipy.real(z), scipy.real(t)
-    return scipy.real(exp(t*u*u)*phi_decay(u)*cos(z*u))
+    u, z, t = np.real(u), np.real(z), np.real(t)
+    return np.real(exp(t*u*u)*phi_decay(u)*cos(z*u))
 
 
 def Ht_real(z, t):
@@ -148,10 +148,10 @@ def Ht_real(z, t):
     :param t:
     :return:
     """
-    if abs(scipy.imag(z)) > 0 or abs(scipy.imag(t)) > 0:
+    if abs(np.imag(z)) > 0 or abs(np.imag(t)) > 0:
         print("complex values not allowed for this function")
         return "error"
-    z, t = scipy.real(z), scipy.real(t)
+    z, t = np.real(z), np.real(t)
     # return quad(Ht_real_integrand, 0, np.inf, args=(z,t))
     # causing overflow errors so np.inf replaced with 10
     return quad(Ht_real_integrand, 0, 10, args=(z, t))
