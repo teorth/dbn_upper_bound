@@ -1,5 +1,75 @@
-#ABC and helper functions can be taken from a different file for now, eg. from Ht_small_x_fixed_mesh_verification.py
-#This part to be fixed later
+# Contour plots for H/B0 and (H'/H). Helpers match
+# Ht_small_x_fixed_mesh_verification.py so this file runs standalone.
+
+from mpmath import mp
+
+mp.dps = 30
+mp.pretty = True
+
+def mpf(x):
+    return mp.mpf(x)
+
+def log(n):
+    return mp.log(n)
+
+def exp(n):
+    return mp.exp(n)
+
+def sqrt(x):
+    return mp.sqrt(x)
+
+def gamma(z):
+    return mp.gamma(z)
+
+def cos(z):
+    return mp.cos(z)
+
+def conj(a):
+    return a.conjugate()
+
+def sum(n, N, summand):
+    return mp.nsum(summand, [n, N])
+
+Pi = mp.pi()
+I = 1j
+
+def alpha1(s):
+    return 1 / (2 * s) + 1 / (s - 1) + (1 / 2) * log(s / (2 * Pi))
+
+def H01(s):
+    return (1 / 2) * s * (s - 1) * Pi ** (-s / 2) * sqrt(2 * Pi) * exp((s / 2 - 1 / 2) * log(s / 2) - s / 2)
+
+def C0(p):
+    return (exp(Pi * I * (p ** 2 / 2 + 3 / 8)) - I * sqrt(2) * cos(Pi * p / 2)) / (2 * cos(Pi * p))
+
+def B0_eff(x, y=0.4, t=0.4):
+    return (1 / 8) * exp((t / 4) * alpha1((1 + y - I * x) / 2) ** 2) * H01((1 + y - I * x) / 2)
+
+def abceff_x(x, y=0.4, t=0.4):
+    T = x / 2
+    Tdash = T + Pi * t / 8
+    a = sqrt(Tdash / (2 * Pi))
+    N = mp.floor(a)
+    p = 1 - 2 * (a - N)
+    U = exp(-I * ((Tdash / 2) * log(Tdash / (2 * Pi)) - Tdash / 2 - Pi / 8))
+    sig = (1 - y) / 2
+    s = sig + I * T
+    sdash = sig + I * Tdash
+    alph1 = alpha1(s)
+    alph2 = alpha1(1 - s)
+    A0 = exp((t / 4) * alph1 ** 2) * H01(s)
+    B0 = exp((t / 4) * alph2 ** 2) * H01(1 - s)
+    A_sum = sum(1, N, lambda n: n ** ((t / 4.0) * log(n) - (t / 2.0) * alph1 - s))
+    B_sum = sum(1, N, lambda n: n ** ((t / 4.0) * log(n) - (t / 2.0) * alph2 - (1 - s)))
+    A = A0 * A_sum
+    B = B0 * B_sum
+    termC1 = Pi ** (-sdash / 2) * gamma(sdash / 2) * (a ** (-sig)) * C0(p) * U
+    termC2 = Pi ** (-(1 - sdash) / 2) * gamma((1 - sdash) / 2) * (a ** (-(1 - sig))) * conj(C0(p)) * conj(U)
+    C = exp(t * Pi ** 2 / 64) * (sdash * (sdash - 1) / 2) * ((-1) ** N) * (termC1 + termC2)
+    return (A + B - C) / 8
+
+def newton_quot_abc(x, y=0.4, t=0.4, h=0.000001):
+    return (abceff_x(x + h, y, t) - abceff_x(x, y, t)) / h
 
 import matplotlib.pyplot as plt
 import numpy as np
