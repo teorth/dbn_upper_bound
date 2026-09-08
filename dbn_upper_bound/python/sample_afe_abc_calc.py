@@ -13,6 +13,7 @@ from dbn_upper_bound.python.mputility import Ht_AFE_ABC
 
 def get_file_path(fname):
     output_dir = 'output/numbers'
+    os.makedirs(output_dir, exist_ok=True)
     fpath = os.path.join(output_dir, fname)
     return fpath
 
@@ -47,7 +48,7 @@ for i in range(1, 5000000001):
     root_check = sign_change(curr_eval, prev_eval)
     if root_check == 1:
         try: approx_root = mp.findroot(lambda y: Ht_AFE_ABC(y,t).real,[z,z-step_size],solver="bisect")
-        except: approx_root = z - step_size/2    
+        except Exception: approx_root = z - step_size/2    
         print(approx_root)
         rootcount += 1
         htroots.append([t, rootcount, approx_root])

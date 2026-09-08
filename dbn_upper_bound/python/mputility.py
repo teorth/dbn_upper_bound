@@ -76,17 +76,16 @@ def c1(p):
     return (-1/(96 * mp.pi() * mp.pi())) * mp.diff(lambda x: c0(x), p, 3)
 
 def RSZ_plain(x):
-    x = mp.mpf(x.real)
+    x = mp.mpf(getattr(x, "real", x))
     tau = mp.sqrt(x/(2 * mp.pi()))
     N = int(tau.real)
-    z = 2 * (x - N) - 1
     running_sum = 0
     for n in range(1, N+1):
         running_sum += mp.cos(RStheta(x)-(x*mp.log(n)))/mp.sqrt(n)
     return (2 * running_sum).real
 
 def RSZ_upto_c0(x):
-    x = mp.mpf(x.real)
+    x = mp.mpf(getattr(x, "real", x))
     tau = mp.sqrt(x / (2 * mp.pi()))
     N = int(tau.real)
     p = tau - N
@@ -96,7 +95,7 @@ def RSZ_upto_c0(x):
     return (2 * running_sum + mp.power(-1, N-1) * mp.power(tau, -0.5) * c0(p)).real
 
 def RSZ_upto_c1(x):
-    x = mp.mpf(x.real)
+    x = mp.mpf(getattr(x, "real", x))
     tau = mp.sqrt(x / (2 * mp.pi()))
     N = int(tau.real)
     p = tau - N
@@ -451,7 +450,7 @@ def expected_zero_gap(t, T):
     return (T - 0.9*T)/(Nt(t, T) - Nt(t, 0.9*T))
 
 def append_data(filename, rows):
-    with open(filename, 'a') as csvfile:
+    with open(filename, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerows(rows)
 
@@ -461,4 +460,4 @@ def sign_change(x, y):
 
 def nonnegative(x):
     if x.real>=0: return x
-    else: return 0.0
+    else: return mp.mpf('0')

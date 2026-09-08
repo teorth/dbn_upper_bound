@@ -28,7 +28,7 @@ for i in range(1, 5000001):
         try:
             approx_root = mp.findroot(lambda y: Ht_AFE_ADJ_AB(y, t).real, [interval_min, interval_max], solver="ridder")
             midpoint_estimate_flag = 0
-        except:
+        except Exception:
             approx_root = (interval_min + interval_max)/2
             midpoint_estimate_flag = 1
         print(approx_root)

@@ -112,6 +112,6 @@ def abbeff_x(x,y=0.4,t=0.4):
 
 #newton quotient of (A_eff+B_eff)/B0_eff for double checking the derivative
 def newton_quot_abbeff_x(x,y=0.4,t=0.4,h=0.00001):
-    newton_quot = (abbeff_x(x+h,y=0.4,t=0.4)[1] - abbeff_x(x,y=0.4,t=0.4)[1])/h
+    newton_quot = (abbeff_x(x+h,y=y,t=t)[1] - abbeff_x(x,y=y,t=t)[1])/h
     return (x,abs(newton_quot))
 
