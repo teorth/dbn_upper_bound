@@ -134,8 +134,7 @@ def Ht_real_integrand(u, z, t):
     """
     if abs(scipy.imag(z)) > 0 or abs(scipy.imag(t)) > 0 \
             or abs(scipy.imag(u)) > 0:
-        print("complex values not allowed for this function")
-        return "error"
+        raise ValueError("complex values not allowed for Ht_real_integrand")
 
     u, z, t = scipy.real(u), scipy.real(z), scipy.real(t)
     return scipy.real(exp(t*u*u)*phi_decay(u)*cos(z*u))
@@ -149,8 +148,7 @@ def Ht_real(z, t):
     :return:
     """
     if abs(scipy.imag(z)) > 0 or abs(scipy.imag(t)) > 0:
-        print("complex values not allowed for this function")
-        return "error"
+        raise ValueError("complex values not allowed for Ht_real")
     z, t = scipy.real(z), scipy.real(t)
     # return quad(Ht_real_integrand, 0, np.inf, args=(z,t))
     # causing overflow errors so np.inf replaced with 10
