@@ -154,7 +154,8 @@ def Ht_real(z, t):
     z, t = scipy.real(z), scipy.real(t)
     # return quad(Ht_real_integrand, 0, np.inf, args=(z,t))
     # causing overflow errors so np.inf replaced with 10
-    return quad(Ht_real_integrand, 0, 10, args=(z, t))
+    # quad returns (value, abserr); callers expect the integral value
+    return quad(Ht_real_integrand, 0, 10, args=(z, t))[0]
 
 #check phi_decay values
 '''print(phi_decay(0.001))
