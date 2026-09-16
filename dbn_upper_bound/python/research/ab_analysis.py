@@ -2,6 +2,7 @@
 Details about the module goes here
 """
 import csv
+import warnings
 from mpmath import mp
 
 mp.dps = 30
@@ -181,7 +182,10 @@ def condcache(N):
         R15 = L15/pow15
         R30 = L30/pow30 
         condc.append([0.0, L1, R1, L1-L2, R1-R2, L1-L2-L3+L6, R1-R2-R3+R6, L1-L2-L3-L5+L6+L10+L15-L30, R1-R2-R3-R5+R6+R10+R15-R30])
-     except:  condc.append([0.0 for _ in range(9)])
+     except Exception as exc:
+        # Do not append a zero row: that silently corrupted cond[n] for later use.
+        warnings.warn(f"condcache failed at n={n}: {exc}")
+        raise
  return condc
 
 def abtoybound(N,y,t,cond):
