@@ -70,7 +70,17 @@ def RStheta(x):
     return (x/2.0)*(mp.log(x/(2*mp.pi())) - 1) - mp.pi()/8.0 + 1/(48.0*x) + 7/(5760.0*mp.power(x, 3))
 
 def c0(p):
-    return mp.cos(2 * mp.pi() * (p * p - p - 1/16.0))/mp.cos(2 * mp.pi() * p)
+    # Factor the removable zeros at p = 1/4 and 3/4 using sinc.
+    p = mp.mpf(p)
+    if p < mp.mpf('0.5'):
+        offset = p - mp.mpf('0.25')
+        factor = offset - mp.mpf('0.5')
+        return (-factor * mp.sinc(2 * mp.pi() * offset * factor)
+                / mp.sinc(2 * mp.pi() * offset))
+    offset = p - mp.mpf('0.75')
+    factor = offset + mp.mpf('0.5')
+    return (factor * mp.sinc(2 * mp.pi() * offset * factor)
+            / mp.sinc(2 * mp.pi() * offset))
 
 def c1(p):
     return (-1/(96 * mp.pi() * mp.pi())) * mp.diff(lambda x: c0(x), p, 3)
