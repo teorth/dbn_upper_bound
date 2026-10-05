@@ -2,7 +2,7 @@
 This module contains various math utilities for the main project
 """
 
-from cmath import exp, log, cos, sqrt
+from cmath import exp, log, sqrt
 from scipy.integrate import quad
 from scipy.optimize import fsolve
 import scipy
@@ -54,7 +54,18 @@ def Ht_complex_integrand(u, z, t):
     :type t:
     :return:
     """
-    return exp(t*u*u)*phi_decay(u)*cos(z*u)
+    # Combine the heat and oscillatory factors with Phi's decay before
+    # exponentiating: separate factors can overflow despite a tiny product.
+    heat = t*u*u
+    phase = 1j*z*u
+    decay = -PI*exp(4*u)
+    running_sum = 0j
+    for n in range(1, 101):
+        base = heat + decay*n*n
+        upper = exp(base + 9*u + phase) + exp(base + 9*u - phase)
+        lower = exp(base + 5*u + phase) + exp(base + 5*u - phase)
+        running_sum += PI_sq*pow(n, 4)*upper - (3*PI/2)*pow(n, 2)*lower
+    return running_sum
 
 
 def Ht_complex(z, t):
@@ -138,7 +149,7 @@ def Ht_real_integrand(u, z, t):
         return "error"
 
     u, z, t = scipy.real(u), scipy.real(z), scipy.real(t)
-    return scipy.real(exp(t*u*u)*phi_decay(u)*cos(z*u))
+    return scipy.real(Ht_complex_integrand(u, z, t))
 
 
 def Ht_real(z, t):
