@@ -370,7 +370,9 @@ def vwf_err(s_orig, t, lim=10, h=0.01):
     T0 = T
     T0dash = T0 + mp.pi()*t/8.0    
     a0 = mp.sqrt(T0dash/(2*mp.pi()))
-    ktermcache = [mp.power(1.1/a0, k) * mp.gamma(mp.mpf(k)/2.0) for k in range(1,lim+5)]
+    max_k = int(mp.floor(lim)) + 4
+    ktermcache = [mp.power(1.1/a0, k) * mp.gamma(mp.mpf(k)/2.0)
+                  for k in range(1, max_k + 1)]
     ksumcache = list(accumulate(ktermcache))
     lower_limit, higher_limit = -1.0*lim, 1.0*lim
     integral_sum = 0.0
