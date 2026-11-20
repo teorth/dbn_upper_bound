@@ -309,6 +309,30 @@ def eps_err(s, t):
         for n in range(1, N+1): zsum += mp.power(n, neg_term1)
     return 0.5 * zsum * mp.exp(term2/(2 * (T - 3.33))) * term2
         
+def composite_trapezoid(lower, upper, step, evaluate):
+    """Composite trapezoid on the nodes the old ``while sigma <= upper`` loop visits.
+
+    The last node is half-weighted by index. Adding a binary ``step`` such as
+    ``0.01`` never lands exactly on ``upper``, so an equality test leaves the
+    final sample at full weight.
+    """
+    if step <= 0:
+        raise ValueError('step must be positive')
+    # Keep the caller's addition (float or mpf). Converting a binary step
+    # such as 0.01 to mpf drops the node that the original loop still visits.
+    nodes = []
+    sigma = lower
+    while sigma <= upper:
+        nodes.append(sigma)
+        sigma += step
+    total = mp.mpf(0)
+    last = len(nodes) - 1
+    for i, sigma in enumerate(nodes):
+        weight = mp.mpf('0.5') if i == 0 or i == last else mp.mpf(1)
+        total += weight * evaluate(sigma)
+    return total * step
+
+
 def vwf_err_old(s_orig, t, lim=10, h=0.01):
     '''This is the older vwf function in which v, w and f are independent and simpler to understand'''
     def v(sigma, s, t):
@@ -338,15 +362,9 @@ def vwf_err_old(s_orig, t, lim=10, h=0.01):
         return fterm1 * fterm2
     lower_limit = -1.0 * lim
     higher_limit = 1.0 * lim
-    integral_sum = 0.0
-    sigma = lower_limit
-    while(sigma <= higher_limit): 
-        sumterm = v(sigma, s_orig, t) * w(sigma, s_orig, t) * f(sigma, s_orig, t)
-        if((sigma == lower_limit) or (sigma == higher_limit)): sumterm /= 2
-        integral_sum += sumterm
-        sigma += h
-    integral_sum *= h
-    return integral_sum
+    return composite_trapezoid(
+        lower_limit, higher_limit, h,
+        lambda sigma: v(sigma, s_orig, t) * w(sigma, s_orig, t) * f(sigma, s_orig, t))
 
 def vwf_err(s_orig, t, lim=10, h=0.01):
     '''This is the new optimized vwf function where v,w,f are passed only the relevant parameters'''
@@ -373,15 +391,9 @@ def vwf_err(s_orig, t, lim=10, h=0.01):
     ktermcache = [mp.power(1.1/a0, k) * mp.gamma(mp.mpf(k)/2.0) for k in range(1,lim+5)]
     ksumcache = list(accumulate(ktermcache))
     lower_limit, higher_limit = -1.0*lim, 1.0*lim
-    integral_sum = 0.0
-    sigma = lower_limit
-    while(sigma <= higher_limit): 
-        sumterm = v(sigma, t, a0, ksumcache) * w(sigma, t, T0dash) * f(sigma, t, sigma0)
-        if((sigma == lower_limit) or (sigma == higher_limit)): sumterm /= 2
-        integral_sum += sumterm
-        sigma += h
-    integral_sum *= h
-    return integral_sum
+    return composite_trapezoid(
+        lower_limit, higher_limit, h,
+        lambda sigma: v(sigma, t, a0, ksumcache) * w(sigma, t, T0dash) * f(sigma, t, sigma0))
 
 def Ht_Effective(z, t):
     """
