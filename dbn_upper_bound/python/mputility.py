@@ -149,12 +149,34 @@ def Ht_AFE(z, t):
         result = 0.25 * (Ft(f_arg1, t) + Ft(f_arg2, t).conjugate())
     return result
 
+def _psi_cos_ratio(p):
+    """cos(pi*(p^2/2 - p - 1/8)) / cos(pi*p), finite at half-integers.
+
+    Both the numerator and the denominator vanish at every half-integer, so
+    the quotient is a removable singularity. Evaluating it directly returns
+    a value that is not the limit.
+    """
+    p = mp.mpf(p)
+    d = p - mp.mpf('0.5')
+    nearest = int(mp.nint(d))
+    if abs(d - nearest) <= mp.mpf('1e-12'):
+        # limit of sin(pi*d*(d-1)/2) / sin(pi*d), then the minus from cos.
+        exponent = nearest * (nearest - 1) // 2 - nearest
+        sign = -1 if exponent % 2 else 1
+        return -sign * mp.mpf(2 * nearest - 1) / 2
+    return (-mp.sinc(mp.pi() * d * (d - 1) / 2) * (d - 1)
+            / (2 * mp.sinc(mp.pi() * d)))
+
+
 def psi(p):
-    term1 = 2 * mp.pi()
-    term2 = mp.cos(mp.pi() * (p * p/2 - p - 1/8.0))
-    term3 = mp.exp(0.5j * mp.pi() * p * p - 5j * mp.pi()/8.0)
-    term4 = mp.cos(mp.pi() * p)
-    return term1 * term2 * term3 / term4
+    p = mp.mpc(p)
+    phase = mp.exp(0.5j * mp.pi() * p * p - 5j * mp.pi() / 8)
+    if p.imag == 0:
+        ratio = _psi_cos_ratio(p.real)
+    else:
+        ratio = (mp.cos(mp.pi() * (p * p / 2 - p - mp.mpf('1') / 8))
+                 / mp.cos(mp.pi() * p))
+    return 2 * mp.pi() * ratio * phase
 
 
 def Ht_AFE_A(z, t):
